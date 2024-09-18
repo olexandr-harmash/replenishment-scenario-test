@@ -1,0 +1,9 @@
+version: '3'
+services:
+  app:
+    build: ./src/Replenishment.API
+    environment:
+      - SERVER_PASS_PHRASE=qwerty12345
+      - SERVER_KEY_PAIR_FILE=my-keypair.json
+    ports: 
+      - "8080:8080"
