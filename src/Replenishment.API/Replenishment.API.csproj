@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Http" Version="8.1.0" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1" />
     <PackageReference Include="Solnet.Extensions" Version="6.1.0" />
     <PackageReference Include="Solnet.KeyStore" Version="6.1.0" />

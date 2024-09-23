@@ -1,0 +1,3 @@
+namespace PantsuTapPlayground.Replenishment.Api.Dtos;
+
+public record ExecuteTransferTransactionDto(string Base64TransactionData);

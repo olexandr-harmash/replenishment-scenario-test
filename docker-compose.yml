@@ -7,3 +7,16 @@ services:
       - SERVER_KEY_PAIR_FILE=my-keypair.json
     ports: 
       - "8080:8080"
+    networks:
+      - app-network
+  
+  web:
+    build: ./src/web
+    ports: 
+      - "3000:3000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
