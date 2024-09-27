@@ -5,6 +5,7 @@ services:
     environment:
       - SERVER_PASS_PHRASE=qwerty12345
       - SERVER_KEY_PAIR_FILE=my-keypair.json
+      - SERVER_PUBLIC_KEY=EsPxEpdzie7F9fFQPpCQyxV7zEJPAjrVSASo7kAhNyov
     ports: 
       - "8080:8080"
     networks:

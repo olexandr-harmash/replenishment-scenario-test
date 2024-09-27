@@ -1538,19 +1538,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\38099\\.nuget\\packages\\": {}
+    "C:\\Users\\1\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\38099\\Desktop\\pantsu_tap_playground\\src\\Replenishment.API\\Replenishment.API.csproj",
+      "projectUniqueName": "C:\\Users\\1\\Desktop\\git\\replenishment-scenario-test\\src\\Replenishment.API\\Replenishment.API.csproj",
       "projectName": "Replenishment.API",
-      "projectPath": "C:\\Users\\38099\\Desktop\\pantsu_tap_playground\\src\\Replenishment.API\\Replenishment.API.csproj",
-      "packagesPath": "C:\\Users\\38099\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\38099\\Desktop\\pantsu_tap_playground\\src\\Replenishment.API\\obj\\",
+      "projectPath": "C:\\Users\\1\\Desktop\\git\\replenishment-scenario-test\\src\\Replenishment.API\\Replenishment.API.csproj",
+      "packagesPath": "C:\\Users\\1\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\1\\Desktop\\git\\replenishment-scenario-test\\src\\Replenishment.API\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\38099\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\1\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [

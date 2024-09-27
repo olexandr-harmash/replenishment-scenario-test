@@ -5,9 +5,9 @@ namespace PantsuTapPlayground.Replenishment.Api.Services;
 
 public class CacheService
 {
-    private readonly IMemoryCache _cache; // Интерфейс для работы с кэшем
-    private readonly MemoryCacheEntryOptions _options; // Опции для конфигурации кэширования
-    private static readonly TimeSpan TransferExpiration = TimeSpan.FromSeconds(30);
+    private readonly IMemoryCache _cache;
+    private readonly MemoryCacheEntryOptions _options;
+    private static readonly TimeSpan TransferExpiration = TimeSpan.FromDays(7);
 
     /// <summary>
     /// Конструктор для инициализации сервиса кэширования.
@@ -17,10 +17,9 @@ public class CacheService
     {
         _cache = cache;
 
-        // Устанавливаем опции для кэширования, где срок хранения в кэше - 10 секунд.
         _options = new MemoryCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = TransferExpiration // 10 секунд
+            AbsoluteExpirationRelativeToNow = TransferExpiration
         };
     }
 
@@ -37,13 +36,26 @@ public class CacheService
             throw new ArgumentNullException(nameof(Transfer), "Transfer cannot be null.");
         }
 
-        // Проверяем, существует ли уже транзакция в кэше
         if (_cache.TryGetValue(key, out _))
         {
-            //throw new InvalidOperationException("Transfer already exists in the cache.");
+            throw new InvalidOperationException("Transfer already exists in the cache.");
         }
 
-        // Сохраняем транзакцию в кэше с использованием опций кэширования
+        _cache.Set(key, t, _options);
+    }
+
+    public void UpdateTransfer(string key, Transfer t)
+    {
+        if (t == null)
+        {
+            throw new ArgumentNullException(nameof(Transfer), "Transfer cannot be null.");
+        }
+
+        if (!_cache.TryGetValue(key, out _))
+        {
+            throw new InvalidOperationException("Transfer not exists in the cache.");
+        }
+
         _cache.Set(key, t, _options);
     }
 
@@ -55,12 +67,11 @@ public class CacheService
     /// <exception cref="Exception">Выбрасывается, если транзакция не найдена в кэше.</exception>
     public Transfer ExtractTransfer(string key)
     {
-        // Пытаемся получить значение из кэша
         if (_cache.TryGetValue(key, out object? value))
         {
             if (value is Transfer tx)
             {
-                return tx; // Возвращаем найденную транзакцию
+                return tx;
             }
             else
             {
@@ -68,19 +79,16 @@ public class CacheService
             }
         }
 
-        // Если значение не найдено, выбрасываем исключение
         throw new KeyNotFoundException($"Transfer with key {key} not found in the cache.");
     }
 
     public void RemoveTransfer(string key)
     {
-        // Проверяем, существует ли транзакция с указанным ключом
         if (!KeyExists(key))
         {
             throw new KeyNotFoundException($"Transfer with key {key} not found in the cache.");
         }
 
-        // Удаляем транзакцию из кеша
         _cache.Remove(key);
     }
 

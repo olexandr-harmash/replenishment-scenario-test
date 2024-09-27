@@ -26,8 +26,7 @@ public class Transfer
         get => _to;
         set
         {
-            // Устанавливаем значение To только если это ваш публичный ключ
-            if (value == "EsPxEpdzie7F9fFQPpCQyxV7zEJPAjrVSASo7kAhNyov")
+            if (value == Environment.GetEnvironmentVariable("SERVER_PUBLIC_KEY"))
             {
                 _to = value;
             }
@@ -43,10 +42,9 @@ public class Transfer
         get => _amount;
         set
         {
-            // Проверяем, что сумма не меньше 100 грн в лампортах
-            if (value < 1_000_000) // 100 грн = 100_000_000 лампорты (если 1 лампорт = 0.000000001 SOL)
+            if (value < 5_000_000)
             {
-                throw new ArgumentException("Amount must be at least 100 грн in lamports.");
+                throw new ArgumentException("Amount must be at least 5 000 000 lamports.");
             }
             _amount = value;
         }

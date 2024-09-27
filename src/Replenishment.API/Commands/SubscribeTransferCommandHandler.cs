@@ -25,35 +25,30 @@ public record SubscribeTransferCommandHandler : INotificationHandler<SubscribeTr
         var _ = await _rpcClient.SubscribeSignatureAsync(request.Signature, (state, resp) =>
         {
             try {
-                // Получаем информацию о транзакции из кэша
-                var transfer = _cache.ExtractTransfer(request.Id);
+                var transfer = _cache.ExtractTransfer(request.Guid);
                 if (transfer == null)
                 {
-                    _logger.LogError($"Transfer with signature {request.Id} not found in cache.");
+                    _logger.LogError($"Transfer with signature {request.Guid} not found in cache.");
                     return;
                 }
 
-                // Проверяем наличие ошибок в ответе
                 var error = resp.Value.Error;
                 if (error != null)
                 {
-                    // Если есть ошибка, логируем её и помечаем статус транзакции как Rejected
                     transfer.Status = TransferStatus.Rejected;
                     _logger.LogError($"Transaction {request.Signature} failed: {error.Type}. Instruction error: {error.InstructionError?.ToString() ?? "None"}");
                 }
                 else
                 {
-                    // Если ошибок нет, помечаем транзакцию как Approved
                     transfer.Status = TransferStatus.Approved;
                     _logger.LogInformation($"Transaction {request.Signature} approved.");
                 }
 
-                // Обновляем информацию о транзакции в кэше
-                _cache.PullTransfer(request.Id, transfer);
+                _cache.UpdateTransfer(request.Guid, transfer);
             } catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while processing the subscription for signature {Signature}.", request.Signature);
             }
-        }, Commitment.Finalized); // Используем Commitment.Finalized для полной финализации транзакции
+        }, Commitment.Finalized);
     }
 }

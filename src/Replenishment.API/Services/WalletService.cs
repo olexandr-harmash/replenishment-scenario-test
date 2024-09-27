@@ -25,18 +25,12 @@ public class WalletService
     {
         _logger = logger;
 
-        // Получение пути к файлу ключа из переменной окружения
-        _keypairFile = Environment.GetEnvironmentVariable("SERVER_KEY_PAIR_FILE") 
-            ?? throw new InvalidOperationException("Environment variable 'SERVER_KEY_PAIR_FILE' is not set.");
+        _keypairFile = Environment.GetEnvironmentVariable("SERVER_KEY_PAIR_FILE") ?? throw new InvalidOperationException("Environment variable 'SERVER_KEY_PAIR_FILE' is not set.");
 
-        // Получение пароля из переменной окружения
-        _passPhrase = Environment.GetEnvironmentVariable("SERVER_PASS_PHRASE") 
-            ?? throw new InvalidOperationException("Environment variable 'SERVER_PASS_PHRASE' is not set.");
+        _passPhrase = Environment.GetEnvironmentVariable("SERVER_PASS_PHRASE") ?? throw new InvalidOperationException("Environment variable 'SERVER_PASS_PHRASE' is not set.");
 
-        // Формирование полного пути к файлу ключа
         _keypairPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _keypairFile);
 
-        // Инициализация сервиса для работы с хранилищем ключей
         _keystoreService = new SecretKeyStoreService();
 
         _logger.LogDebug("Passphrase successfully retrieved.");
@@ -52,36 +46,29 @@ public class WalletService
     {
         try
         {
-            // Проверяем наличие файла хранилища ключей
             if (!File.Exists(_keypairPath))
             {
                 _logger.LogError($"Keypair file not found at path: {_keypairPath}");
-                throw new FileNotFoundException("Keypair file not found", _keypairPath);
+                throw new FileNotFoundException("Keypair file not found");
             }
 
-            // Чтение зашифрованного JSON-файла с ключами
             var encryptedKeystoreJson = File.ReadAllText(_keypairPath);
 
-            // Расшифровка ключа с использованием passphrase
             var decryptedKeystore = _keystoreService.DecryptKeyStoreFromJson(_passPhrase, encryptedKeystoreJson);
 
-            // Конвертация расшифрованного хранилища в строку
             var mnemonicString = Encoding.UTF8.GetString(decryptedKeystore);
 
-            // Инициализация кошелька с использованием мнемонической фразы
             var mnemonic = new Mnemonic(mnemonicString);
             return new Wallet(mnemonic);
         }
         catch (FileNotFoundException fnfe)
         {
-            // Логируем и пробрасываем исключение, если файл не найден
-            _logger.LogError(fnfe, "Keypair file was not found.");
+            _logger.LogError(fnfe.Message);
             throw;
         }
         catch (Exception ex)
         {
-            // Логируем и пробрасываем любые другие ошибки
-            _logger.LogError(ex, "An error occurred during wallet initialization.");
+            _logger.LogError(ex.Message);
             throw;
         }
     }
