@@ -1,11 +1,10 @@
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using PantsuTapPlayground.Replenishment.Api.Commands;
-using PantsuTapPlayground.Replenishment.Api.Dtos;
-using PantsuTapPlayground.Replenishment.Api.Models;
-using Solnet.Programs;
 using Solnet.Rpc.Models;
-using Solnet.Wallet;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.HttpResults;
+
+using Log = Serilog.Log;
+using System.Security.Claims;
 
 namespace PantsuTapPlayground.Replenishment.Api.Apis;
 
@@ -13,28 +12,15 @@ public static class ReplenishmentApi
 {
     public static IEndpointRouteBuilder MapReplenishmentApiV1(this IEndpointRouteBuilder app)
     {
-
         var api = app.MapGroup("api/replenishment").HasApiVersion(1.0);
-
-        api.MapPut("/transaction", ExecuteTransaction);
-
+        api.MapPost("/transaction", ExecuteTransaction);
         return app;
     }
 
     public static async Task<Results<Ok, BadRequest<string>>> ExecuteTransaction(
-        [FromHeader(Name = "Authorization")] string authorizationHeader,
         [FromBody] ExecuteTransferTransactionDto request,
         [AsParameters] ReplenishmentServices services)
     {
-        var token = authorizationHeader?.Replace("Bearer ", string.Empty);
-
-        if (string.IsNullOrEmpty(token))
-        {
-            return TypedResults.BadRequest("Authorization header is missing or invalid.");
-        }
-
-        var guid = Guid.NewGuid();
-
         var msgBytes = Transaction.Deserialize(request.Base64TransactionData).CompileMessage();
         var msg = Message.Deserialize(msgBytes);
 
@@ -43,40 +29,26 @@ public static class ReplenishmentApi
         Transfer transferInstruction;
         try
         {
-            var data = instructions.Single(i => i.InstructionName == nameof(Transfer));
-
-            transferInstruction = new Transfer
-            {
-                From = (PublicKey)data.Values["From Account"],
-                To = (PublicKey)data.Values["To Account"],
-                Amount = (ulong)data.Values["Amount"]
-            };
-
-            services.Logger.LogInformation(
-                "Transfer sending:\n From: {From}\n To: {To}\n Amount: {Amount}",
-                transferInstruction.From,
-                transferInstruction.To,
-                transferInstruction.Amount);
-
-            services.Cache.PullTransfer(guid.ToString(), transferInstruction);
+            transferInstruction = services.Transfer.GetTransferFromInstructions(instructions);
+            services.Cache.PullTransfer(transferInstruction.Id, transferInstruction);
         }
-        catch (InvalidOperationException e)
+        catch (Exception e)
         {
-            services.Logger.LogError(e.Message);
+            Log.Error(e, "An error occurred while retrieving transfer instruction.");
             return TypedResults.BadRequest("Transfer instruction not found or ambiguous.");
         }
 
         var result = await services.RpcCilent.SendTransactionAsync(request.Base64TransactionData);
-
         if (!result.WasSuccessful)
         {
-            services.Logger.LogError(result.Reason);
+            Log.Error("Error sending the transaction: {Reason}", result.Reason);
             return TypedResults.BadRequest("Error sending the transaction.");
         }
 
-        var requestTransfer = new SubscribeTransferCommand(result.Result, guid.ToString());
+        transferInstruction.Signature = result.Result;
+        var requestTransfer = new SubscribeTransferCommand(transferInstruction);
 
-        services.Logger.LogInformation(
+        Log.Information(
             "Sending command: {CommandName}: ({@Command})",
             nameof(requestTransfer),
             requestTransfer);

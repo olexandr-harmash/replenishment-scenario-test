@@ -1,7 +1,3 @@
-using PantsuTapPlayground.Replenishment.Api.Apis;
-using PantsuTapPlayground.Replenishment.Api.Services;
-using Solnet.Rpc;
-
 // Project: PantsuTapPlayground.Replenishment.Api
 // Author: [Oleksandr Harmash]
 // Description: This is the main entry point for the Replenishment API of the Pantsu Tap project. 
@@ -23,51 +19,41 @@ using Solnet.Rpc;
 // - Setup CORS policy to restrict access to authorized domains.
 // - Ensure HTTPS is enforced for secure communication.
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Configuration.AddEnvironmentVariables();
+Log.Information("Starting up");
 
-builder.Services.AddMemoryCache();
-builder.Services.AddScoped<WalletService>();
-builder.Services.AddScoped<CacheService>();
-builder.Services.AddSingleton(ClientFactory.GetStreamingClient(Cluster.DevNet));
-
-builder.Services.AddMediatR(cfg =>
+try 
 {
-    cfg.RegisterServicesFromAssemblyContaining(typeof(Program));
-});
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    builder.Host.UseSerilog((ctx, lc) => lc
+        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+        .Enrich.FromLogContext()
+        .ReadFrom.Configuration(ctx.Configuration));
 
-builder.Services.AddApiVersioning();
+    builder.Configuration.AddEnvironmentVariables();
 
- builder.Services.AddCors(options =>
+    var app = builder
+        .ConfigureServices()
+        .ConfigurePipeline();
+
+    using (var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+    {
+        var client = scope.ServiceProvider.GetRequiredService<IStreamingRpcClient>();
+        await client.ConnectAsync();
+    }
+
+    app.Run();
+} 
+catch (Exception ex)
 {
-    options.AddPolicy("AllowAll", builder => builder
-        .AllowAnyOrigin()
-        .AllowAnyHeader()
-        .AllowAnyMethod());
-});
-
-var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var client = scope.ServiceProvider.GetRequiredService<IStreamingRpcClient>();
-    await client.ConnectAsync();
+    Log.Fatal(ex, "Unhandled exception");
 }
-
-if (app.Environment.IsDevelopment())
+finally
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    Log.Information("Shut down complete");
+    Log.CloseAndFlush();
 }
-
-app.UseCors("AllowAll");
-app.UseHttpsRedirection();
-
-app.NewVersionedApi("Replenishment")
-   .MapReplenishmentApiV1();
-
-app.Run();

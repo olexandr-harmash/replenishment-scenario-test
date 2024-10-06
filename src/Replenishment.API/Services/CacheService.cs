@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Caching.Memory;
-using PantsuTapPlayground.Replenishment.Api.Models;
 
 namespace PantsuTapPlayground.Replenishment.Api.Services;
 
-public class CacheService
+public class CacheService : ICacheService
 {
     private readonly IMemoryCache _cache;
     private readonly MemoryCacheEntryOptions _options;
@@ -29,7 +28,7 @@ public class CacheService
     /// <param name="key">Ключ для сохранения транзакции.</param>
     /// <param name="tx">Транзакция в виде массива байт.</param>
     /// <returns>Возвращает сохранённый массив байт транзакции.</returns>
-    public void PullTransfer(string key, Transfer t)
+    public void PullTransfer(Guid key, Transfer t)
     {
         if (t == null)
         {
@@ -44,7 +43,7 @@ public class CacheService
         _cache.Set(key, t, _options);
     }
 
-    public void UpdateTransfer(string key, Transfer t)
+    public void UpdateTransfer(Guid key, Transfer t)
     {
         if (t == null)
         {
@@ -65,7 +64,7 @@ public class CacheService
     /// <param name="key">Ключ для поиска транзакции.</param>
     /// <returns>Массив байт, представляющий транзакцию.</returns>
     /// <exception cref="Exception">Выбрасывается, если транзакция не найдена в кэше.</exception>
-    public Transfer ExtractTransfer(string key)
+    public Transfer ExtractTransfer(Guid key)
     {
         if (_cache.TryGetValue(key, out object? value))
         {
@@ -82,7 +81,7 @@ public class CacheService
         throw new KeyNotFoundException($"Transfer with key {key} not found in the cache.");
     }
 
-    public void RemoveTransfer(string key)
+    public void RemoveTransfer(Guid key)
     {
         if (!KeyExists(key))
         {
@@ -92,7 +91,7 @@ public class CacheService
         _cache.Remove(key);
     }
 
-    public bool KeyExists(string key)
+    public bool KeyExists(Guid key)
     {
         return _cache.TryGetValue(key, out _);
     }
