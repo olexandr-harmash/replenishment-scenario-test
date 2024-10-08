@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D7FF6C81-A16
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Replenishment.API", "src\Replenishment.API\Replenishment.API.csproj", "{FD349820-6662-4105-B37E-E5A1F7193447}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity", "src\Identity\Identity.csproj", "{3376AF2C-AE93-4B85-9F6E-C0A4B4C30C49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebClient", "src\WebClient\WebClient.csproj", "{252EEE88-0792-4FA3-BD2B-7B481A1F2C5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,18 @@ Global
 		{FD349820-6662-4105-B37E-E5A1F7193447}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD349820-6662-4105-B37E-E5A1F7193447}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD349820-6662-4105-B37E-E5A1F7193447}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3376AF2C-AE93-4B85-9F6E-C0A4B4C30C49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3376AF2C-AE93-4B85-9F6E-C0A4B4C30C49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3376AF2C-AE93-4B85-9F6E-C0A4B4C30C49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3376AF2C-AE93-4B85-9F6E-C0A4B4C30C49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{252EEE88-0792-4FA3-BD2B-7B481A1F2C5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{252EEE88-0792-4FA3-BD2B-7B481A1F2C5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{252EEE88-0792-4FA3-BD2B-7B481A1F2C5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{252EEE88-0792-4FA3-BD2B-7B481A1F2C5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FD349820-6662-4105-B37E-E5A1F7193447} = {D7FF6C81-A167-4642-A97A-F2D860BE3F04}
+		{3376AF2C-AE93-4B85-9F6E-C0A4B4C30C49} = {D7FF6C81-A167-4642-A97A-F2D860BE3F04}
+		{252EEE88-0792-4FA3-BD2B-7B481A1F2C5C} = {D7FF6C81-A167-4642-A97A-F2D860BE3F04}
 	EndGlobalSection
 EndGlobal
