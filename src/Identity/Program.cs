@@ -1,5 +1,4 @@
-﻿using Identity;
-using Serilog;
+﻿using Serilog;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
