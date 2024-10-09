@@ -7,7 +7,7 @@ namespace PantsuTapPlayground.Replenishment.Api.Services;
 /// <summary>
 /// Сервис для управления кошельками, включая инициализацию кошельков из хранилища ключей.
 /// </summary>
-public class WalletService
+public class WalletService : IWalletService
 {
     private readonly string _keypairFile;
     private readonly string _keypairPath;

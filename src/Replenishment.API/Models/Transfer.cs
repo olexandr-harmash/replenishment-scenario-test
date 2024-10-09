@@ -2,8 +2,13 @@ namespace PantsuTapPlayground.Replenishment.Api.Models;
 
 public class Transfer
 {
+    private ulong _minAmount = 5_000_000;
     private ulong _amount;
-    private string? _signature;
+    private string _signature = string.Empty;
+    private string _to = string.Empty;
+    public Guid Id = new Guid();
+    public string From { get; set; } = string.Empty;
+    public TransferStatus Status { get; set; } = TransferStatus.Sending;
 
     public string? Signature
     {
@@ -17,9 +22,6 @@ public class Transfer
             _signature = value;
         }
     }
-
-    public string From { get; set; } = string.Empty;
-    private string _to = string.Empty;
 
     public string To
     {
@@ -42,13 +44,11 @@ public class Transfer
         get => _amount;
         set
         {
-            if (value < 5_000_000)
+            if (value < _minAmount)
             {
                 throw new ArgumentException("Amount must be at least 5 000 000 lamports.");
             }
             _amount = value;
         }
     }
-
-    public TransferStatus Status { get; set; } = TransferStatus.Sending;
 }
