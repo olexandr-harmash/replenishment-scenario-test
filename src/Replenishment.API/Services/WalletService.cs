@@ -53,11 +53,9 @@ public class WalletService : IWalletService
             }
 
             var encryptedKeystoreJson = File.ReadAllText(_keypairPath);
-
             var decryptedKeystore = _keystoreService.DecryptKeyStoreFromJson(_passPhrase, encryptedKeystoreJson);
 
             var mnemonicString = Encoding.UTF8.GetString(decryptedKeystore);
-
             var mnemonic = new Mnemonic(mnemonicString);
             return new Wallet(mnemonic);
         }

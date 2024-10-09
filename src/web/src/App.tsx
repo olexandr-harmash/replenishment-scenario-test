@@ -1,55 +1,100 @@
+import { Button, CircularProgress, createTheme, Paper, ThemeProvider, Typography } from '@mui/material';
 import './App.css';
-import { useEffect, useState } from 'react';
-import { useConnection, useWallet } from './utils/providerConnect';
-import createTransferTransaction from './utils/createTransferTransaction';
-import { PublicKey } from '@solana/web3.js';
-import sendTransaction from './utils/sendTransaction';
+import { useAuth } from 'react-oidc-context';
 
-
-
-window.Buffer = window.Buffer || require("buffer").Buffer;
-
+const draculaTheme = createTheme({
+  palette: {
+    mode: 'dark', // Темная тема
+    primary: {
+      main: '#ee8611', // Оранжевый
+    },
+    secondary: {
+      main: '#C70039', // Розовый
+    },
+    background: {
+      default: '#272626', // Темный фон
+      paper: '#272626', // Фон для карточек
+    },
+    text: {
+      primary: '#f8f8f2', // Белый текст
+      secondary: '#6272a4', // Серый текст
+    },
+  },
+});
 
 const App = () => {
-  const { wallet, error: werr } = useWallet();
-  const { connection, error: cerr } = useConnection();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const auth = useAuth();
 
-  const handleTransaction = async () => {
-      try {
-        const receiver = new PublicKey('EsPxEpdzie7F9fFQPpCQyxV7zEJPAjrVSASo7kAhNyov');
-        setLoading(true);
-        
-        const transaction = await createTransferTransaction(wallet!.publicKey!, receiver, 1_000_000, connection!);
-        const signedTransaction = await wallet!.signTransaction(transaction);
-        
-        await sendTransaction(wallet!.publicKey!, signedTransaction);
-        setError(null); // Сбрасываем ошибку после успешной транзакции
-      } catch (err: any) {
-        setError(`Error while processing transaction: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-  };
+  switch (auth.activeNavigator) {
+    case 'signinSilent':
+      return (
+        <Paper elevation={3} style={{ padding: '20px', textAlign: 'center' }}>
+          <Typography variant="h5">Signing you in...</Typography>
+          <CircularProgress />
+        </Paper>
+      );
+    case 'signoutRedirect':
+      return (
+        <Paper elevation={3} style={{ padding: '20px', textAlign: 'center' }}>
+          <Typography variant="h5">Signing you out...</Typography>
+        </Paper>
+      );
+    default:
+      break;
+  }
 
-  useEffect(() => {
-    if (wallet && connection) {
-      setLoading(false);
-    }
-  }, [wallet, connection]);
+  if (auth.isLoading) {
+    return (
+      <Paper elevation={3} style={{ padding: '20px', textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography variant="h5">Loading...</Typography>
+      </Paper>
+    );
+  }
+
+  if (auth.error) {
+    return (
+      <Paper elevation={3} style={{ padding: '20px', textAlign: 'center' }}>
+        <Typography variant="h5">Oops... {auth.error.message}</Typography>
+      </Paper>
+    );
+  }
+
+  if (auth.isAuthenticated) {
+    return (
+      <Paper elevation={3} style={{ padding: '20px', textAlign: 'center' }}>
+        <Typography variant="h5">Hello {auth.user?.profile.sub}</Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => void auth.removeUser()}
+        >
+          Log out
+        </Button>
+      </Paper>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: '400px', margin: 'auto', textAlign: 'center', padding: '20px' }}>
-      <h1>Wallet Transaction</h1>
-      {werr && <p style={{ color: 'red' }}>Wallet Error: {werr}</p>}
-      {cerr && <p style={{ color: 'red' }}>Connection Error: {cerr}</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <button onClick={() => handleTransaction()} disabled={loading}>
-        {loading ? 'Processing...' : 'Send 1,000,000 Lamports'}
-      </button>
-    </div>
+    <Paper elevation={3} style={{ padding: '20px', textAlign: 'center' }}>
+      <Typography variant="h5">Please log in</Typography>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => void auth.signinRedirect()}
+      >
+        Log in
+      </Button>
+    </Paper>
   );
 };
 
-export default App;
+const AppWithTheme = () => {
+  return (
+    <ThemeProvider theme={draculaTheme}>
+      <App />
+    </ThemeProvider>
+  );
+};
+
+export default AppWithTheme;
